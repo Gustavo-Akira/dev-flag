@@ -1,0 +1,72 @@
+@startuml
+skinparam classAttributeIconSize 0
+
+class Workspace {
+  +id: UUID
+  +name: String
+  +slug: String
+}
+
+class WorkspaceMember {
+  +id: UUID
+  +userId: UUID
+  +role: WorkspaceRole
+}
+
+class Project {
+  +id: UUID
+  +name: String
+  +description: String
+}
+
+class Environment {
+  +id: UUID
+  +name: EnvironmentType
+}
+
+class FeatureFlag {
+  +id: UUID
+  +name: String
+  +key: String
+  +enabled: Boolean
+}
+
+class RolloutConfiguration {
+  +percentage: Integer
+}
+
+class TargetingRule {
+  +userId: String
+}
+
+class AuditLog {
+  +id: UUID
+  +action: AuditAction
+  +createdAt: Instant
+}
+
+enum WorkspaceRole {
+  OWNER
+  ADMIN
+  DEVELOPER
+  VIEWER
+}
+
+enum EnvironmentType {
+  DEV
+  STAGING
+  PROD
+}
+
+Workspace "1" -- "*" WorkspaceMember
+Workspace "1" -- "*" Project
+
+Project "1" -- "*" Environment
+
+Environment "1" -- "*" FeatureFlag
+
+FeatureFlag "1" -- "1" RolloutConfiguration
+FeatureFlag "1" -- "*" TargetingRule
+FeatureFlag "1" -- "*" AuditLog
+
+@enduml
