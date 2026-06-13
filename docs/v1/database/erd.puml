@@ -1,0 +1,97 @@
+@startuml
+title Feature Flag Platform - ERD (V1)
+
+hide methods
+hide stereotypes
+skinparam linetype ortho
+
+entity workspaces {
+  * id : UUID <<PK>>
+  --
+  * name : VARCHAR
+  * slug : VARCHAR <<UNIQUE>>
+  * created_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+}
+
+entity workspace_members {
+  * id : UUID <<PK>>
+  --
+  * workspace_id : UUID <<FK>>
+  * user_id : UUID
+  * role : VARCHAR
+  * created_at : TIMESTAMP
+}
+
+entity projects {
+  * id : UUID <<PK>>
+  --
+  * workspace_id : UUID <<FK>>
+  * name : VARCHAR
+  description : TEXT
+  * created_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+}
+
+entity environments {
+  * id : UUID <<PK>>
+  --
+  * project_id : UUID <<FK>>
+  * name : VARCHAR
+  * sdk_key : VARCHAR <<UNIQUE>>
+  * created_at : TIMESTAMP
+}
+
+entity feature_flags {
+  * id : UUID <<PK>>
+  --
+  * environment_id : UUID <<FK>>
+  * name : VARCHAR
+  * key : VARCHAR
+  description : TEXT
+  * enabled : BOOLEAN
+  * default_value : BOOLEAN
+  * created_at : TIMESTAMP
+  * updated_at : TIMESTAMP
+}
+
+entity rollout_configurations {
+  * id : UUID <<PK>>
+  --
+  * feature_flag_id : UUID <<FK>>
+  * percentage : INTEGER
+}
+
+entity user_targeting {
+  * id : UUID <<PK>>
+  --
+  * feature_flag_id : UUID <<FK>>
+  * user_id : VARCHAR
+}
+
+entity audit_logs {
+  * id : UUID <<PK>>
+  --
+  * workspace_id : UUID <<FK>>
+  * actor_id : UUID
+  * entity_type : VARCHAR
+  * entity_id : UUID
+  * action : VARCHAR
+  old_value : JSONB
+  new_value : JSONB
+  * created_at : TIMESTAMP
+}
+
+workspaces ||--o{ workspace_members
+workspaces ||--o{ projects
+
+projects ||--o{ environments
+
+environments ||--o{ feature_flags
+
+feature_flags ||--o| rollout_configurations
+feature_flags ||--o{ user_targeting
+
+workspaces ||--o{ audit_logs
+
+@enduml
