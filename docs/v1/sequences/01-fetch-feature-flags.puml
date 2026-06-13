@@ -1,0 +1,27 @@
+@startuml
+title Fetch Feature Flags (V1)
+
+actor Scheduler
+participant "FeatureFlagClient SDK" as SDK
+participant "Feature Flag API" as API
+participant "FeatureFlagService" as Service
+database "FeatureFlagRepository" as Repo
+collections "InMemory Cache" as Cache
+
+Scheduler -> SDK: trigger refresh()
+
+SDK -> API: GET /sdk/flags
+
+API -> Service: fetchFlags(environmentKey)
+
+Service -> Repo: findByEnvironment()
+
+Repo --> Service: flags
+
+Service --> API: feature flags payload
+
+API --> SDK: 200 OK + flags
+
+SDK -> Cache: replace cache
+
+@enduml

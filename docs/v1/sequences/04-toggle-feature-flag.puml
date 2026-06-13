@@ -1,0 +1,31 @@
+@startuml
+title Toggle Feature Flag
+
+actor User
+participant Controller
+participant "FeatureFlagApplicationService" as AppService
+database Repository
+participant "FeatureFlag Aggregate" as Aggregate
+participant AuditService
+
+User -> Controller: Toggle Feature Flag
+
+Controller -> AppService: toggleFlag()
+
+AppService -> Repository: findById()
+
+Repository --> AppService: FeatureFlag
+
+AppService -> Aggregate: enable()/disable()
+
+Aggregate --> AppService: updated state
+
+AppService -> Repository: save()
+
+AppService -> AuditService: registerEvent()
+
+AppService --> Controller: success response
+
+Controller --> User: 200 OK
+
+@enduml

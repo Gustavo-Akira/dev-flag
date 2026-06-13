@@ -1,0 +1,35 @@
+@startuml
+title Evaluate Feature Flag (Local SDK)
+
+actor Application
+participant "FeatureFlagClient" as Client
+collections "InMemory Cache" as Cache
+participant "TargetingEvaluator" as Targeting
+participant "RolloutEvaluator" as Rollout
+
+Application -> Client: isEnabled(flagKey, user)
+
+Client -> Cache: get(flagKey)
+
+alt Flag not found
+    Client --> Application: defaultValue(false)
+end
+
+alt Flag disabled
+    Client --> Application: false
+end
+
+Client -> Targeting: evaluate(user)
+
+alt User targeted
+    Targeting --> Client: true
+    Client --> Application: true
+end
+
+Client -> Rollout: evaluate(userId, percentage)
+
+Rollout --> Client: result
+
+Client --> Application: enabled/disabled
+
+@enduml

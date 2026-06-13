@@ -1,0 +1,34 @@
+@startuml
+title Create Feature Flag
+
+actor User
+participant Controller
+participant "FeatureFlagApplicationService" as AppService
+participant "FeatureFlag Aggregate" as Aggregate
+database Repository
+participant AuditService
+
+User -> Controller: Create Feature Flag Request
+
+Controller -> AppService: createFlag(command)
+
+AppService -> Repository: existsByKey()
+
+alt Key already exists
+    Repository --> AppService: true
+    AppService --> Controller: validation error
+end
+
+AppService -> Aggregate: create()
+
+Aggregate --> AppService: FeatureFlag
+
+AppService -> Repository: save(flag)
+
+AppService -> AuditService: registerEvent()
+
+AppService --> Controller: success response
+
+Controller --> User: 201 Created
+
+@enduml
