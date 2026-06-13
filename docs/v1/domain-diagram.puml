@@ -1,62 +1,110 @@
 @startuml
 skinparam classAttributeIconSize 0
+skinparam linetype ortho
 
-class Workspace {
-  +id: UUID
-  +name: String
-  +slug: String
-}
+title Feature Flag Platform - Domain Diagram (V1)
 
-class WorkspaceMember {
-  +id: UUID
-  +userId: UUID
-  +role: WorkspaceRole
-}
-
-class Project {
-  +id: UUID
-  +name: String
-  +description: String
-}
-
-class Environment {
-  +id: UUID
-  +name: EnvironmentType
-}
-
-class FeatureFlag {
-  +id: UUID
-  +name: String
-  +key: String
-  +enabled: Boolean
-}
-
-class RolloutConfiguration {
-  +percentage: Integer
-}
-
-class TargetingRule {
-  +userId: String
-}
-
-class AuditLog {
-  +id: UUID
-  +action: AuditAction
-  +createdAt: Instant
-}
+' ==========================
+' ENUMS
+' ==========================
 
 enum WorkspaceRole {
-  OWNER
-  ADMIN
-  DEVELOPER
-  VIEWER
+OWNER
+ADMIN
+DEVELOPER
+VIEWER
 }
 
 enum EnvironmentType {
-  DEV
-  STAGING
-  PROD
+DEV
+STAGING
+PROD
 }
+
+enum AuditAction {
+FEATURE_FLAG_CREATED
+FEATURE_FLAG_UPDATED
+FEATURE_FLAG_ENABLED
+FEATURE_FLAG_DISABLED
+ROLLOUT_UPDATED
+TARGETING_UPDATED
+}
+
+' ==========================
+' ENTITIES
+' ==========================
+
+class Workspace {
++id: UUID
++name: String
++slug: String
++createdAt: Instant
++updatedAt: Instant
+}
+
+class WorkspaceMember {
++id: UUID
++workspaceId: UUID
++userId: UUID
++role: WorkspaceRole
++createdAt: Instant
+}
+
+class Project {
++id: UUID
++workspaceId: UUID
++name: String
++description: String
++createdAt: Instant
++updatedAt: Instant
+}
+
+class Environment {
++id: UUID
++projectId: UUID
++name: EnvironmentType
++createdAt: Instant
+}
+
+class FeatureFlag {
++id: UUID
++environmentId: UUID
++name: String
++key: String
++description: String
++enabled: Boolean
++defaultValue: Boolean
++createdAt: Instant
++updatedAt: Instant
+}
+
+class RolloutConfiguration {
++id: UUID
++featureFlagId: UUID
++percentage: Integer
+}
+
+class UserTargeting {
++id: UUID
++featureFlagId: UUID
++userId: String
+}
+
+class AuditLog {
++id: UUID
++workspaceId: UUID
++actorId: UUID
++entityType: String
++entityId: UUID
++action: AuditAction
++oldValue: JSON
++newValue: JSON
++createdAt: Instant
+}
+
+' ==========================
+' RELATIONSHIPS
+' ==========================
 
 Workspace "1" -- "*" WorkspaceMember
 Workspace "1" -- "*" Project
@@ -65,8 +113,7 @@ Project "1" -- "*" Environment
 
 Environment "1" -- "*" FeatureFlag
 
-FeatureFlag "1" -- "1" RolloutConfiguration
-FeatureFlag "1" -- "*" TargetingRule
-FeatureFlag "1" -- "*" AuditLog
+FeatureFlag "1" -- "0..1" RolloutConfiguration
+FeatureFlag "1" -- "*" UserTargeting
 
 @enduml
