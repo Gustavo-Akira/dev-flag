@@ -1,0 +1,38 @@
+sdkFlags:
+  get:
+    tags:
+      - SDK
+    summary: Fetch feature flags
+    description: Returns feature flags for SDK local evaluation.
+    parameters:
+      - in: header
+        name: X-SDK-Key
+        required: true
+        schema:
+          type: string
+      - in: header
+        name: If-None-Match
+        required: false
+        schema:
+          type: string
+        description: ETag from a previous response; server returns 304 if flags have not changed.
+    responses:
+      '200':
+        description: Flags loaded
+        headers:
+          ETag:
+            description: Version token to use in subsequent If-None-Match requests.
+            schema:
+              type: string
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/feature-flag.yaml#/SdkFlagsResponse'
+      '304':
+        description: Not Modified
+      '401':
+        description: Invalid SDK key
+        content:
+          application/json:
+            schema:
+              $ref: '../schemas/errors.yaml#/ErrorResponse'

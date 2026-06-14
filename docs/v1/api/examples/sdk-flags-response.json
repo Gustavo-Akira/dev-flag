@@ -1,0 +1,11 @@
+{
+  "environment": "prod",
+  "version": 1,
+  "flags": [
+    {
+      "key": "new-checkout",
+      "enabled": true,
+      "defaultValue": false
+    }
+  ]
+}

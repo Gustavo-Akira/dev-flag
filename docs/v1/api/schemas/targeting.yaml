@@ -1,0 +1,10 @@
+TargetingRequest:
+  type: object
+  required:
+    - userIds
+  properties:
+    userIds:
+      type: array
+      description: List of user IDs to explicitly target with this flag.
+      items:
+        type: string

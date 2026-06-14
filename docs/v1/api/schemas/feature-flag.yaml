@@ -1,0 +1,87 @@
+FeatureFlag:
+  type: object
+  required:
+    - id
+    - environmentId
+    - key
+    - name
+    - enabled
+    - defaultValue
+  properties:
+    id:
+      type: string
+      format: uuid
+    environmentId:
+      type: string
+      format: uuid
+    key:
+      type: string
+    name:
+      type: string
+    description:
+      type: string
+    enabled:
+      type: boolean
+    defaultValue:
+      type: boolean
+
+CreateFeatureFlagRequest:
+  type: object
+  required:
+    - key
+    - name
+  properties:
+    key:
+      type: string
+    name:
+      type: string
+    description:
+      type: string
+
+UpdateFeatureFlagRequest:
+  type: object
+  required:
+    - name
+  properties:
+    name:
+      type: string
+    description:
+      type: string
+
+ToggleFeatureFlagRequest:
+  type: object
+  required:
+    - enabled
+  properties:
+    enabled:
+      type: boolean
+
+SdkFlag:
+  type: object
+  required:
+    - key
+    - enabled
+    - defaultValue
+  properties:
+    key:
+      type: string
+    enabled:
+      type: boolean
+    defaultValue:
+      type: boolean
+
+SdkFlagsResponse:
+  type: object
+  required:
+    - environment
+    - version
+    - flags
+  properties:
+    environment:
+      type: string
+    version:
+      type: integer
+    flags:
+      type: array
+      items:
+        $ref: '#/SdkFlag'

@@ -1,0 +1,9 @@
+RolloutRequest:
+  type: object
+  required:
+    - percentage
+  properties:
+    percentage:
+      type: integer
+      minimum: 0
+      maximum: 100

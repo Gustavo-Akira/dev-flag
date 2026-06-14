@@ -1,0 +1,33 @@
+openapi: 3.1.0
+info:
+  title: Feature Flag Platform API
+  version: v1
+  description: Feature Flag Platform API V1
+
+servers:
+  - url: http://localhost:8080
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+
+paths:
+  /sdk/flags:
+    $ref: './paths/sdk.yaml#/sdkFlags'
+
+  /environments/{environmentId}/flags:
+    $ref: './paths/feature-flags.yaml#/createFeatureFlag'
+
+  /flags/{flagId}:
+    $ref: './paths/feature-flags.yaml#/featureFlagById'
+
+  /flags/{flagId}/toggle:
+    $ref: './paths/feature-flags.yaml#/toggleFeatureFlag'
+
+  /flags/{flagId}/rollout:
+    $ref: './paths/feature-flags.yaml#/updateRollout'
+
+  /flags/{flagId}/targeting:
+    $ref: './paths/feature-flags.yaml#/updateTargeting'
