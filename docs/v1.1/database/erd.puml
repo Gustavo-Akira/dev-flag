@@ -1,0 +1,169 @@
+@startuml
+title Feature Flag Platform - ERD (V1.1)
+
+hide methods
+hide stereotypes
+skinparam linetype ortho
+
+' ===========================
+' Identity
+' ===========================
+
+entity users {
+    * id : UUID <<PK>>
+    --
+    * name : VARCHAR
+    * email : VARCHAR <<UNIQUE>>
+    * password_hash : VARCHAR
+    * status : VARCHAR
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+' ===========================
+' Workspace
+' ===========================
+
+entity workspaces {
+    * id : UUID <<PK>>
+    --
+    * name : VARCHAR
+    * slug : VARCHAR <<UNIQUE>>
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity workspace_members {
+    * id : UUID <<PK>>
+    --
+    * workspace_id : UUID <<FK>>
+    * user_id : UUID <<FK>>
+    * role : VARCHAR
+    * status: VARCHAR
+    * joined_at : TIMESTAMP
+}
+
+entity workspace_invitations {
+    * id : UUID <<PK>>
+    --
+    * workspace_id : UUID <<FK>>
+    * email : VARCHAR
+    * role : VARCHAR
+    * token : VARCHAR
+    * status : VARCHAR
+    * invited_by: UUID <<FK>>
+    * expires_at : TIMESTAMP
+    * created_at : TIMESTAMP
+    * accepted_at:   TIMESTAMP
+}
+
+' ===========================
+' Project
+' ===========================
+
+entity projects {
+    * id : UUID <<PK>>
+    --
+    * workspace_id : UUID <<FK>>
+    * name : VARCHAR
+    * description : TEXT
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+' ===========================
+' Environment
+' ===========================
+
+entity environments {
+    * id : UUID <<PK>>
+    --
+    * project_id : UUID <<FK>>
+    * name : VARCHAR
+
+    * sdk_key_hash : VARCHAR
+    * sdk_key_prefix : VARCHAR
+
+    * created_at : TIMESTAMP
+}
+
+' ===========================
+' Feature Flag
+' ===========================
+
+entity feature_flags {
+    * id : UUID <<PK>>
+    --
+    * environment_id : UUID <<FK>>
+
+    * name : VARCHAR
+    * key : VARCHAR
+
+    * description : TEXT
+
+    * enabled : BOOLEAN
+    * archived : BOOLEAN
+    * default_value : BOOLEAN
+
+    * created_at : TIMESTAMP
+    * updated_at : TIMESTAMP
+}
+
+entity rollout_configurations {
+    * id : UUID <<PK>>
+    --
+    * feature_flag_id : UUID <<FK>>
+
+    * percentage : INTEGER
+}
+
+entity feature_flag_targets {
+    * id : UUID <<PK>>
+    --
+    * feature_flag_id : UUID <<FK>>
+
+    * target_type: VARCHAR
+    * target_key: VARCHAR
+    * created_at: TIMESTAMP
+}
+
+' ===========================
+' Audit
+' ===========================
+
+entity audit_logs {
+    * id : UUID <<PK>>
+    --
+    * workspace_id : UUID <<FK>>
+    * user_id : UUID <<FK>>
+    * resource_name: VARCHAR
+    * resource_type : VARCHAR
+    * resource_id : VARCHAR
+
+    * action : VARCHAR
+
+    * changes: JSONB
+
+    * created_at : TIMESTAMP
+}
+
+' ===========================
+' Relationships
+' ===========================
+
+users ||--o{ workspace_members
+users ||--o{ workspace_invitations
+users ||--o{ audit_logs
+workspaces ||--o{ workspace_members
+workspaces ||--o{ workspace_invitations
+workspaces ||--o{ projects
+workspaces ||--o{ audit_logs
+
+projects ||--o{ environments
+
+environments ||--o{ feature_flags
+
+feature_flags ||--|| rollout_configurations
+feature_flags ||--o{ feature_flag_targets
+
+@enduml
