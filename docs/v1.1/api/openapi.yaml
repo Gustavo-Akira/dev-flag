@@ -1,0 +1,697 @@
+openapi: 3.1.0
+info:
+  title: Feature Flag Platform API
+  version: 1.1.0
+  description: API contract for Feature Flag Platform V1.1.
+servers:
+- url: http://localhost:8080/api/v1
+tags:
+- name: Authentication
+  description: User registration and authentication operations.
+- name: Workspaces
+  description: Workspace lifecycle operations.
+- name: Workspace Members
+  description: Workspace membership, roles, and workspace-scoped status operations.
+- name: Workspace Invitations
+  description: Workspace invitation lifecycle operations.
+- name: Projects
+  description: Project lifecycle operations.
+- name: Environments
+  description: Project environment lifecycle operations.
+- name: Feature Flags
+  description: Feature flag lifecycle and state transition operations.
+- name: Rollout Configurations
+  description: Percentage rollout configuration operations.
+- name: Feature Flag Targets
+  description: Explicit feature flag targeting operations.
+- name: Audit Logs
+  description: Workspace-scoped audit log query operations.
+security:
+- bearerAuth: []
+paths:
+  /auth/register:
+    post:
+      operationId: registerUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RegisterUserRequest'
+      responses:
+        '201':
+          description: User registered
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+      tags:
+      - Authentication
+  /auth/login:
+    post:
+      operationId: authenticateUser
+      security: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthenticateUserRequest'
+      responses:
+        '200':
+          description: User authenticated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthenticationResponse'
+      tags:
+      - Authentication
+  /workspaces:
+    get:
+      operationId: listWorkspaces
+      responses:
+        '200':
+          description: Workspaces
+      tags:
+      - Workspaces
+    post:
+      operationId: createWorkspace
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceRequest'
+      responses:
+        '201':
+          description: Workspace created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/WorkspaceResponse'
+      tags:
+      - Workspaces
+  /workspaces/{workspaceId}/members:
+    get:
+      operationId: listWorkspaceMembers
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      responses:
+        '200':
+          description: Members
+      tags:
+      - Workspace Members
+  /workspaces/{workspaceId}/members/{memberId}:
+    patch:
+      operationId: updateWorkspaceMember
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MemberId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateWorkspaceMemberRequest'
+      responses:
+        '200':
+          description: Member updated
+      tags:
+      - Workspace Members
+    delete:
+      operationId: removeWorkspaceMember
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - $ref: '#/components/parameters/MemberId'
+      responses:
+        '204':
+          description: Member removed
+      tags:
+      - Workspace Members
+  /workspaces/{workspaceId}/invitations:
+    post:
+      operationId: inviteWorkspaceMember
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateWorkspaceInvitationRequest'
+      responses:
+        '201':
+          description: Invitation created
+      tags:
+      - Workspace Invitations
+  /workspace-invitations/{token}/accept:
+    post:
+      operationId: acceptWorkspaceInvitation
+      parameters:
+      - name: token
+        in: path
+        required: true
+        schema:
+          type: string
+      responses:
+        '200':
+          description: Invitation accepted
+      tags:
+      - Workspace Invitations
+  /workspaces/{workspaceId}/projects:
+    post:
+      operationId: createProject
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateProjectRequest'
+      responses:
+        '201':
+          description: Project created
+      tags:
+      - Projects
+  /projects/{projectId}/environments:
+    post:
+      operationId: createEnvironment
+      parameters:
+      - $ref: '#/components/parameters/ProjectId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateEnvironmentRequest'
+      responses:
+        '201':
+          description: Environment created
+      tags:
+      - Environments
+  /environments/{environmentId}/feature-flags:
+    get:
+      operationId: listFeatureFlags
+      parameters:
+      - $ref: '#/components/parameters/EnvironmentId'
+      responses:
+        '200':
+          description: Feature flags
+      tags:
+      - Feature Flags
+    post:
+      operationId: createFeatureFlag
+      parameters:
+      - $ref: '#/components/parameters/EnvironmentId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/CreateFeatureFlagRequest'
+      responses:
+        '201':
+          description: Feature flag created
+      tags:
+      - Feature Flags
+  /feature-flags/{featureFlagId}/enable:
+    post:
+      operationId: enableFeatureFlag
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      responses:
+        '200':
+          description: Feature flag enabled
+      tags:
+      - Feature Flags
+  /feature-flags/{featureFlagId}/disable:
+    post:
+      operationId: disableFeatureFlag
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      responses:
+        '200':
+          description: Feature flag disabled
+      tags:
+      - Feature Flags
+  /feature-flags/{featureFlagId}/archive:
+    post:
+      operationId: archiveFeatureFlag
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      responses:
+        '200':
+          description: Feature flag archived
+      tags:
+      - Feature Flags
+  /feature-flags/{featureFlagId}/restore:
+    post:
+      operationId: restoreFeatureFlag
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      responses:
+        '200':
+          description: Feature flag restored
+      tags:
+      - Feature Flags
+  /feature-flags/{featureFlagId}/rollout:
+    put:
+      operationId: configureFeatureFlagRollout
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ConfigureRolloutRequest'
+      responses:
+        '200':
+          description: Rollout configured
+      tags:
+      - Rollout Configurations
+    delete:
+      operationId: removeFeatureFlagRollout
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      responses:
+        '204':
+          description: Rollout removed
+      tags:
+      - Rollout Configurations
+  /feature-flags/{featureFlagId}/targets:
+    get:
+      operationId: listFeatureFlagTargets
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      responses:
+        '200':
+          description: Targets
+      tags:
+      - Feature Flag Targets
+    post:
+      operationId: addFeatureFlagTarget
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AddFeatureFlagTargetRequest'
+      responses:
+        '201':
+          description: Target added
+      tags:
+      - Feature Flag Targets
+  /feature-flags/{featureFlagId}/targets/{targetId}:
+    delete:
+      operationId: removeFeatureFlagTarget
+      parameters:
+      - $ref: '#/components/parameters/FeatureFlagId'
+      - $ref: '#/components/parameters/TargetId'
+      responses:
+        '204':
+          description: Target removed
+      tags:
+      - Feature Flag Targets
+  /workspaces/{workspaceId}/audit-logs:
+    get:
+      operationId: viewAuditLog
+      parameters:
+      - $ref: '#/components/parameters/WorkspaceId'
+      - name: userId
+        in: query
+        schema:
+          type: string
+          format: uuid
+      - name: action
+        in: query
+        schema:
+          type: string
+      - name: resourceType
+        in: query
+        schema:
+          type: string
+      - name: resourceId
+        in: query
+        schema:
+          type: string
+      - name: from
+        in: query
+        schema:
+          type: string
+          format: date-time
+      - name: to
+        in: query
+        schema:
+          type: string
+          format: date-time
+      responses:
+        '200':
+          description: Audit logs
+      tags:
+      - Audit Logs
+  /projects/{projectId}:
+    parameters:
+    - $ref: '#/components/parameters/ProjectId'
+    get:
+      tags:
+      - Projects
+      operationId: getProject
+      summary: Get a project
+      responses:
+        '200':
+          description: Project
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+      - Projects
+      operationId: updateProject
+      summary: Replace project metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateProjectRequest'
+      responses:
+        '200':
+          description: Project updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ProjectResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Projects
+      operationId: deleteProject
+      summary: Delete a project
+      responses:
+        '204':
+          description: Project deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+  /environments/{environmentId}:
+    parameters:
+    - $ref: '#/components/parameters/EnvironmentId'
+    get:
+      tags:
+      - Environments
+      operationId: getEnvironment
+      summary: Get an environment
+      responses:
+        '200':
+          description: Environment
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentResponse'
+        '404':
+          $ref: '#/components/responses/NotFound'
+    put:
+      tags:
+      - Environments
+      operationId: updateEnvironment
+      summary: Replace environment metadata
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UpdateEnvironmentRequest'
+      responses:
+        '200':
+          description: Environment updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EnvironmentResponse'
+        '400':
+          $ref: '#/components/responses/BadRequest'
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+    delete:
+      tags:
+      - Environments
+      operationId: deleteEnvironment
+      summary: Delete an environment
+      responses:
+        '204':
+          description: Environment deleted
+        '403':
+          $ref: '#/components/responses/Forbidden'
+        '404':
+          $ref: '#/components/responses/NotFound'
+        '409':
+          $ref: '#/components/responses/Conflict'
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+  parameters:
+    WorkspaceId:
+      name: workspaceId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    MemberId:
+      name: memberId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    ProjectId:
+      name: projectId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    EnvironmentId:
+      name: environmentId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    FeatureFlagId:
+      name: featureFlagId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+    TargetId:
+      name: targetId
+      in: path
+      required: true
+      schema:
+        type: string
+        format: uuid
+  schemas:
+    RegisterUserRequest:
+      type: object
+      required:
+      - name
+      - email
+      - password
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        email:
+          type: string
+          format: email
+          maxLength: 150
+        password:
+          type: string
+          format: password
+          minLength: 8
+    AuthenticateUserRequest:
+      type: object
+      required:
+      - email
+      - password
+      properties:
+        email:
+          type: string
+          format: email
+        password:
+          type: string
+          format: password
+    AuthenticationResponse:
+      type: object
+      required:
+      - accessToken
+      - tokenType
+      properties:
+        accessToken:
+          type: string
+        tokenType:
+          type: string
+          const: Bearer
+    CreateWorkspaceRequest:
+      type: object
+      required:
+      - name
+      - slug
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        slug:
+          type: string
+          maxLength: 200
+    WorkspaceResponse:
+      type: object
+      properties:
+        id:
+          type: string
+          format: uuid
+        name:
+          type: string
+        slug:
+          type: string
+        createdAt:
+          type: string
+          format: date-time
+        updatedAt:
+          type: string
+          format: date-time
+    WorkspaceRole:
+      type: string
+      enum:
+      - OWNER
+      - ADMIN
+      - DEVELOPER
+      - VIEWER
+    WorkspaceMemberStatus:
+      type: string
+      enum:
+      - ACTIVE
+      - DISABLED
+    UpdateWorkspaceMemberRequest:
+      type: object
+      minProperties: 1
+      properties:
+        role:
+          $ref: '#/components/schemas/WorkspaceRole'
+        status:
+          $ref: '#/components/schemas/WorkspaceMemberStatus'
+    CreateWorkspaceInvitationRequest:
+      type: object
+      required:
+      - email
+      - role
+      properties:
+        email:
+          type: string
+          format: email
+          maxLength: 200
+        role:
+          $ref: '#/components/schemas/WorkspaceRole'
+    CreateProjectRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          maxLength: 100
+        description:
+          type:
+          - string
+          - 'null'
+    CreateEnvironmentRequest:
+      type: object
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          maxLength: 100
+    CreateFeatureFlagRequest:
+      type: object
+      required:
+      - name
+      - key
+      - defaultValue
+      properties:
+        name:
+          type: string
+          maxLength: 150
+        key:
+          type: string
+          maxLength: 200
+        description:
+          type:
+          - string
+          - 'null'
+        defaultValue:
+          type: boolean
+    ConfigureRolloutRequest:
+      type: object
+      required:
+      - percentage
+      properties:
+        percentage:
+          type: integer
+          minimum: 0
+          maximum: 100
+    TargetType:
+      type: string
+      enum:
+      - USER
+      - TENANT
+      - ORGANIZATION
+      - DEVICE
+    AddFeatureFlagTargetRequest:
+      type: object
+      required:
+      - type
+      - key
+      properties:
+        type:
+          $ref: '#/components/schemas/TargetType'
+        key:
+          type: string
+          maxLength: 200
+    UpdateEnvironmentRequest:
+      type: object
+      additionalProperties: false
+      required:
+      - name
+      properties:
+        name:
+          type: string
+          minLength: 1
+          maxLength: 100
