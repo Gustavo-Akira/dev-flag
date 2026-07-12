@@ -1,9 +1,12 @@
 package br.com.gustavoakira.flag.identity.adapter.output.persistence;
 
 import static org.junit.jupiter.api.Assertions.assertSame;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import static org.mockito.Mockito.*;
 
+import br.com.gustavoakira.flag.identity.domain.Email;
 import br.com.gustavoakira.flag.identity.domain.User;
+import java.util.Optional;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +30,8 @@ class JpaUserRepositoryAdapterTest {
 
   private JpaUserRepositoryAdapter adapter;
 
+  private final Email email = new Email("gustavo@email.com");
+
   @BeforeEach
   void setUp() {
     adapter = new JpaUserRepositoryAdapter(jpaRepository, mapper);
@@ -47,5 +52,32 @@ class JpaUserRepositoryAdapterTest {
     verify(mapper).toDomain(savedEntity);
 
     verifyNoMoreInteractions(mapper, jpaRepository);
+  }
+
+  @Test
+  void shouldGetUserWhenEmailIsFound() {
+    when(jpaRepository.findByEmail(email.value())).thenReturn(Optional.of(savedEntity));
+    when(mapper.toDomain(savedEntity)).thenReturn(savedUser);
+
+    Optional<User> result = adapter.findUserByEmail(email);
+    assertTrue(result.isPresent());
+    assertSame(savedUser, result.get());
+
+    verify(jpaRepository).findByEmail(email.value());
+    verify(mapper).toDomain(savedEntity);
+
+    verifyNoMoreInteractions(mapper, jpaRepository);
+  }
+
+  @Test
+  void shouldReturnEmptyOptionalWhenEmailsIsNotFound() {
+    when(jpaRepository.findByEmail(email.value())).thenReturn(Optional.empty());
+
+    Optional<User> result = adapter.findUserByEmail(email);
+    assertTrue(result.isEmpty());
+
+    verify(jpaRepository).findByEmail(email.value());
+
+    verifyNoMoreInteractions(jpaRepository);
   }
 }
