@@ -1,39 +1,38 @@
 package br.com.gustavoakira.flag.identity.adapter.output.id;
 
+import static org.junit.jupiter.api.Assertions.*;
+
 import br.com.gustavoakira.flag.identity.domain.UserId;
 import org.junit.jupiter.api.Test;
 
-
-import static org.junit.jupiter.api.Assertions.*;
-
 class IdGeneratorAdapterTest {
 
-    private final IdGeneratorAdapter adapter = new IdGeneratorAdapter();
+  private final IdGeneratorAdapter adapter = new IdGeneratorAdapter();
 
-    @Test
-    void shouldGenerateUserId() {
-        UserId id = adapter.generateUserId();
+  @Test
+  void shouldGenerateUserId() {
+    UserId id = adapter.generateUserId();
 
-        assertNotNull(id);
-    }
+    assertNotNull(id);
+  }
 
-    @Test
-    void shouldGenerateDifferentIds() {
-        UserId first = adapter.generateUserId();
-        UserId second = adapter.generateUserId();
+  @Test
+  void shouldGenerateDifferentIds() {
+    UserId first = adapter.generateUserId();
+    UserId second = adapter.generateUserId();
 
-        assertNotEquals(first, second);
-    }
+    assertNotEquals(first, second);
+  }
 
-    @Test
-    void shouldGenerateValidUuid() {
-        UserId id = adapter.generateUserId();
-        assertNotNull(id.value());
-    }
+  @Test
+  void shouldGenerateValidUuid() {
+    UserId id = adapter.generateUserId();
+    assertNotNull(id.value());
+  }
 
-    @Test
-    void shouldGenerateUuidVersion7() {
-        UserId id = adapter.generateUserId();
-        assertEquals(7, id.value().version());
-    }
+  @Test
+  void shouldGenerateUuidVersion7() {
+    UserId id = adapter.generateUserId();
+    assertEquals(7, id.value().version());
+  }
 }
