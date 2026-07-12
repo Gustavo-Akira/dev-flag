@@ -4,12 +4,16 @@ on:
   pull_request:
     branches:
       - main
+
   push:
     branches:
       - main
 
 permissions:
   contents: read
+
+env:
+  GRADLE_OPTS: -Dorg.gradle.daemon=false
 
 jobs:
   build:
@@ -19,7 +23,7 @@ jobs:
     timeout-minutes: 15
 
     steps:
-      - name: Checkout repository
+      - name: Checkout Repository
         uses: actions/checkout@v4
 
       - name: Setup Java 25
@@ -27,28 +31,34 @@ jobs:
         with:
           distribution: temurin
           java-version: 25
-          cache: gradle
 
       - name: Setup Gradle
         uses: gradle/actions/setup-gradle@v4
 
-      - name: Grant execute permission
+      - name: Grant Execute Permission
         run: chmod +x gradlew
+
+
+      - name: Compile Sources
+        run: ./gradlew classes
 
       - name: Spotless Check
         run: ./gradlew spotlessCheck
 
-      - name: Run Tests
+      - name: SpotBugs
+        run: ./gradlew spotbugsMain
+
+
+      - name: Unit Tests
         run: ./gradlew test
 
       - name: Coverage Verification
         run: ./gradlew jacocoTestCoverageVerification
 
-      - name: SpotBugs
-        run: ./gradlew spotbugsMain
 
-      - name: Build
-        run: ./gradlew build
+      - name: Assemble Artifact
+        run: ./gradlew assemble
+
 
       - name: Upload Reports
         if: always()
@@ -57,5 +67,6 @@ jobs:
           name: quality-reports
           path: |
             build/reports/tests
+            build/test-results
             build/reports/jacoco
             build/reports/spotbugs
