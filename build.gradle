@@ -92,7 +92,7 @@ tasks.build {
 
 spotless {
 	java {
-		googleJavaFormat()
+		googleJavaFormat("1.30.0")
 		removeUnusedImports()
 		trimTrailingWhitespace()
 		endWithNewline()
