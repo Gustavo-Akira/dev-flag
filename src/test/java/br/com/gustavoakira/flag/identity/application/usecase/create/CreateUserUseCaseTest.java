@@ -49,7 +49,8 @@ class CreateUserUseCaseTest {
     when(clockPort.now()).thenReturn(now);
     when(userRepositoryPort.createUser(any(User.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com"))).thenReturn(Optional.empty());
+    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com")))
+        .thenReturn(Optional.empty());
 
     User result = useCase.execute(command);
 
@@ -80,7 +81,8 @@ class CreateUserUseCaseTest {
     when(clockPort.now()).thenReturn(now);
     when(userRepositoryPort.createUser(any(User.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
-    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com"))).thenReturn(Optional.empty());
+    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com")))
+        .thenReturn(Optional.empty());
 
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
@@ -100,7 +102,7 @@ class CreateUserUseCaseTest {
   }
 
   @Test
-  void shouldNotPersistWhenEmailAlreadyInUse(){
+  void shouldNotPersistWhenEmailAlreadyInUse() {
     UserId userId = new UserId(UUID.randomUUID());
     LocalDateTime now = LocalDateTime.of(2026, 7, 11, 12, 0);
 
@@ -109,16 +111,18 @@ class CreateUserUseCaseTest {
     when(idGeneratorPort.generateUserId()).thenReturn(userId);
     when(cryptographyPort.hash("123456")).thenReturn("hashed-password");
     when(clockPort.now()).thenReturn(now);
-    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com"))).thenReturn(Optional.of(User.reconstitute(
-            userId,
-            "akira",
-            new Email("gustavo@email.com"),
-            "sfdasdf",
-            UserStatus.ACTIVE,
-            LocalDateTime.now(),
-            null
-    )));
+    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com")))
+        .thenReturn(
+            Optional.of(
+                User.reconstitute(
+                    userId,
+                    "akira",
+                    new Email("gustavo@email.com"),
+                    "sfdasdf",
+                    UserStatus.ACTIVE,
+                    LocalDateTime.now(),
+                    null)));
 
-    assertThrows(EmailAlreadyOnUse.class,()->useCase.execute(command));
+    assertThrows(EmailAlreadyOnUse.class, () -> useCase.execute(command));
   }
 }
