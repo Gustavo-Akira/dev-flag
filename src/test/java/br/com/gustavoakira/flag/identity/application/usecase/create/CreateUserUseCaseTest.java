@@ -9,10 +9,13 @@ import br.com.gustavoakira.flag.identity.application.port.output.CryptographyPor
 import br.com.gustavoakira.flag.identity.application.port.output.IdGeneratorPort;
 import br.com.gustavoakira.flag.identity.application.port.output.UserRepositoryPort;
 import br.com.gustavoakira.flag.identity.application.usecase.create.command.CreateUserCommand;
+import br.com.gustavoakira.flag.identity.application.usecase.exceptions.EmailAlreadyOnUse;
+import br.com.gustavoakira.flag.identity.domain.Email;
 import br.com.gustavoakira.flag.identity.domain.User;
 import br.com.gustavoakira.flag.identity.domain.UserId;
 import br.com.gustavoakira.flag.identity.domain.UserStatus;
 import java.time.LocalDateTime;
+import java.util.Optional;
 import java.util.UUID;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -46,6 +49,8 @@ class CreateUserUseCaseTest {
     when(clockPort.now()).thenReturn(now);
     when(userRepositoryPort.createUser(any(User.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
+    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com")))
+        .thenReturn(Optional.empty());
 
     User result = useCase.execute(command);
 
@@ -76,6 +81,8 @@ class CreateUserUseCaseTest {
     when(clockPort.now()).thenReturn(now);
     when(userRepositoryPort.createUser(any(User.class)))
         .thenAnswer(invocation -> invocation.getArgument(0));
+    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com")))
+        .thenReturn(Optional.empty());
 
     ArgumentCaptor<User> captor = ArgumentCaptor.forClass(User.class);
 
@@ -92,5 +99,30 @@ class CreateUserUseCaseTest {
     assertEquals(UserStatus.ACTIVE, user.getStatus());
     assertEquals(now, user.getCreatedAt());
     assertNull(user.getUpdatedAt());
+  }
+
+  @Test
+  void shouldNotPersistWhenEmailAlreadyInUse() {
+    UserId userId = new UserId(UUID.randomUUID());
+    LocalDateTime now = LocalDateTime.of(2026, 7, 11, 12, 0);
+
+    CreateUserCommand command = new CreateUserCommand("Gustavo", "gustavo@email.com", "123456");
+
+    when(idGeneratorPort.generateUserId()).thenReturn(userId);
+    when(cryptographyPort.hash("123456")).thenReturn("hashed-password");
+    when(clockPort.now()).thenReturn(now);
+    when(userRepositoryPort.findUserByEmail(new Email("gustavo@email.com")))
+        .thenReturn(
+            Optional.of(
+                User.reconstitute(
+                    userId,
+                    "akira",
+                    new Email("gustavo@email.com"),
+                    "sfdasdf",
+                    UserStatus.ACTIVE,
+                    LocalDateTime.now(),
+                    null)));
+
+    assertThrows(EmailAlreadyOnUse.class, () -> useCase.execute(command));
   }
 }

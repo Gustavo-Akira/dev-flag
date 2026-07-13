@@ -5,6 +5,7 @@ import br.com.gustavoakira.flag.identity.application.port.output.CryptographyPor
 import br.com.gustavoakira.flag.identity.application.port.output.IdGeneratorPort;
 import br.com.gustavoakira.flag.identity.application.port.output.UserRepositoryPort;
 import br.com.gustavoakira.flag.identity.application.usecase.create.command.CreateUserCommand;
+import br.com.gustavoakira.flag.identity.application.usecase.exceptions.EmailAlreadyOnUse;
 import br.com.gustavoakira.flag.identity.domain.Email;
 import br.com.gustavoakira.flag.identity.domain.User;
 import br.com.gustavoakira.flag.identity.domain.UserId;
@@ -37,6 +38,10 @@ public class CreateUserUseCase {
     String passwordHash = cryptographyPort.hash(command.password());
     Email email = new Email(command.email());
     LocalDateTime now = clockPort.now();
+    boolean emailAlreadyOnUse = userRepositoryPort.findUserByEmail(email).isPresent();
+    if (emailAlreadyOnUse) {
+      throw new EmailAlreadyOnUse("Email " + email.value() + " already on use");
+    }
     User user = User.create(createdId, command.name(), email, passwordHash, now);
     return userRepositoryPort.createUser(user);
   }
