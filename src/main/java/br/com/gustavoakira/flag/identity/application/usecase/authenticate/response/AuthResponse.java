@@ -2,8 +2,4 @@ package br.com.gustavoakira.flag.identity.application.usecase.authenticate.respo
 
 import java.time.Instant;
 
-public record AuthResponse(
-        String jwt,
-        Instant expiresDate
-) {
-}
+public record AuthResponse(String jwt, Instant expiresDate) {}
