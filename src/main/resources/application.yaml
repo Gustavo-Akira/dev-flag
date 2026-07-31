@@ -4,3 +4,7 @@ spring:
   threads:
     virtual:
       enabled: true
+security:
+  jwt:
+    secret: 0f4f76debbf3479ec6c8abe581b09ad90abd7445f0dca68956bc9743d114496b
+    expiration: 24H
